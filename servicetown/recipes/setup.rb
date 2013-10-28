@@ -7,4 +7,6 @@
 # All rights reserved - Do Not Redistribute
 #
 
-include_recipe "play2"
+package 'git'
+
+include_recipe "servicetown::play2"
