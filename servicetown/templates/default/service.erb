@@ -1,0 +1,80 @@
+#!/bin/sh
+# chkconfig: 345 20 80
+# description: <%= @name %> playframework application start/shutdown script
+# processname: <%= @name %>
+
+# User running the Play process
+USER=root
+
+# Name of the application
+APPLICATION_NAME="<%= @name %>"
+# Path to the application source
+APPLICATION_PATH="<%= @path %>"
+APP_OPTIONS="<%= @options %>"
+
+. /etc/init.d/functions
+
+RETVAL=0
+
+start() {
+    echo -n "Starting Play service: "
+    su $USER -c "${APPLICATION_PATH}/<%= @command %> ${APP_OPTIONS} > /dev/null &"
+    RETVAL=$?
+
+    if [ $RETVAL -eq 0 ]; then
+        echo_success
+    else
+        echo_failure
+    fi
+    echo
+}
+
+stop() {
+    if [ -f $APPLICATION_PATH/RUNNING_PID ]
+    then
+        echo -n "Shutting down Play service: ${APPLICATION_PATH}/"
+        su $USER -c "ulimit -n 65536"
+        su $USER -c "cd ${APPLICATION_PATH} ; play stop"
+    fi
+
+    RETVAL=$?
+
+    if [ $RETVAL -eq 0 ]; then
+        echo_success
+    else
+        echo_failure
+    fi
+    echo
+}
+
+status() {
+    #TODO
+    echo
+}
+
+clean() {
+        rm -f ${APPLICATION_PATH}/RUNNING_PID
+}
+case "$1" in
+    start)
+    clean
+    start
+    ;;
+    stop)
+    stop
+    ;;
+    restart|reload)
+    stop
+    sleep 10
+    start
+    ;;
+    status)
+    status
+    ;;
+    clean)
+    clean
+    ;;
+    *)
+    echo "Usage: $0 {start|stop|restart|status}"
+esac
+exit 0
