@@ -22,22 +22,11 @@ artifact_deploy "play2" do
   owner "root"
   group "root"
 
-  after_extract Proc.new {
-    execute "move files into place" do
-      cwd release_path
-      command "mv play-#{version}/* ."
-    end
-
-    directory "#{release_path}/play-#{version}" do
-      action :delete
-    end
-  }
-
   after_deploy Proc.new {
     link "/usr/bin/play" do
-      to "#{release_path}/play"
+      to "#{release_path}/play-#{version}/play"
     end
   }
 
-  action :deploy
+  action :nothing if Chef::Artifact.get_current_deployed_version(deploy_to) == version
 end
