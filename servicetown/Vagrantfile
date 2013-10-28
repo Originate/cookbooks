@@ -71,11 +71,22 @@ Vagrant.configure("2") do |config|
     chef.json = {
       :play2 => {
         :version => '2.1.3'
+      },
+      :deploy => {
+        :sample => {
+          :deploy_to => "/opt/sample",
+          :scm => {
+            :repository => "git://github.com/Bowbaq/sample-play-app.git"
+          }
+        }
       }
     }
 
     chef.run_list = [
-      "recipe[servicetown::play2]"
+      "recipe[servicetown::setup]",
+      "recipe[servicetown::deploy]"
     ]
+
+    # chef.log_level = :debug
   end
 end
