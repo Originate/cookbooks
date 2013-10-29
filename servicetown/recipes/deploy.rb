@@ -8,6 +8,20 @@
 #
 
 node[:deploy].each do |application, deploy|
+
+  default_play_options = -> {
+    options = []
+    if node[:play2][:http_port]
+      options << "-Dhttp.port=#{node[:play2][:http_port]}"
+    end
+
+    options.join(" ")
+  }
+
+  play_options = -> {
+    [default_play_options.call, node[:play2][:options]].join(" ")
+  }
+
   directory ::File.join(deploy[:deploy_to], "shared") do
     recursive true
     action :create
@@ -39,7 +53,7 @@ node[:deploy].each do |application, deploy|
         variables({
           :name => application,
           :path => release_path,
-          :options => "",
+          :options => play_options.call,
           :command => "target/start"
         })
       end
