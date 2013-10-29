@@ -1,6 +1,6 @@
 #
-# Cookbook Name:: servicetown
-# Recipe:: play2
+# Cookbook Name:: play2
+# Recipe:: setup
 #
 # Copyright (C) 2013 Originate, Inc
 #
@@ -9,6 +9,8 @@
 
 include_recipe "java"
 
+package 'git'
+
 url     = node[:play2][:url]
 version = node[:play2][:version]
 
@@ -16,7 +18,7 @@ artifact_deploy "play2" do
   version node[:play2][:version]
   artifact_location "#{url}/#{version}/play-#{version}.zip"
 
-  deploy_to "/opt/play"
+  deploy_to node[:play2][:deploy_to] || "/opt/play"
   shared_directories []
 
   owner "root"

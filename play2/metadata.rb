@@ -1,4 +1,4 @@
-name             'servicetown'
+name             'play2'
 maintainer       'Maxime Bury'
 maintainer_email 'maxime.bury@originate.com'
 license          'All rights reserved'

@@ -1,5 +1,5 @@
 #
-# Cookbook Name:: servicetown
+# Cookbook Name:: play2
 # Recipe:: deploy
 #
 # Copyright (C) 2013 Originate, Inc
@@ -24,6 +24,17 @@ node[:deploy].each do |application, deploy|
 
     restart_command "sudo service #{application} restart"
     before_restart do
+      # Create the application template
+      template ::File.join(release_path, "conf/application.conf") do
+        source "app_conf.erb"
+        owner "root"
+        group "root"
+        mode  "0755"
+        variables({
+          :flat_conf => play_flat_config(node[:play2][:conf])
+        })
+      end
+
       execute "package the application" do
         cwd release_path
         user "root"
@@ -32,7 +43,7 @@ node[:deploy].each do |application, deploy|
 
       # Update the service template
       template "/etc/init.d/#{application}" do
-        source "service.erb"
+        source "app_service.erb"
         owner "root"
         group "root"
         mode  "0755"
