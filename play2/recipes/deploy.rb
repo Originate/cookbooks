@@ -39,7 +39,9 @@ node[:deploy].each do |application, deploy|
     variables({
       :flat_conf => play_flat_config(node[:play2][:conf])
     })
-    only_if node[:play2][:conf] != nil
+    only_if do
+      node[:play2][:conf] != nil
+    end
   end
 
   # Create the logging configuration file
