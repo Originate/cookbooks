@@ -8,60 +8,66 @@
 #
 
 node[:deploy].each do |application, deploy|
-  # Seems to be needed or else deploy_revision crashes
-  directory ::File.join(deploy[:deploy_to], "shared") do
-    recursive true
-    action :create
+
+  opsworks_deploy_dir do
+    user deploy[:user]
+    group deploy[:group]
+    path deploy[:deploy_to]
   end
 
-  deploy_revision "#{deploy[:deploy_to]}" do
-    repo     deploy[:scm][:repository]
-    revision deploy[:scm][:revision] || "master"
-
-    symlink_before_migrate.clear
-    create_dirs_before_symlink.clear
-    purge_before_symlink.clear
-    symlinks.clear
-
-    restart_command "sudo service #{application} restart"
-    before_restart do
-      # Create the application template
-      template ::File.join(release_path, deploy[:scm][:app_dir], "conf/application.conf") do
-        source "app_conf.erb"
-        owner "root"
-        group "root"
-        mode  "0755"
-        variables({
-          :flat_conf => play_flat_config(node[:play2][:conf])
-        })
-      end
-
-      execute "package the application" do
-        cwd ::File.join(release_path, deploy[:scm][:app_dir])
-        user "root"
-        command "play clean stage"
-      end
-
-      # Update the service template
-      template "/etc/init.d/#{application}" do
-        source "app_service.erb"
-        owner "root"
-        group "root"
-        mode  "0755"
-        variables({
-          :name => application,
-          :path => ::File.join(release_path, deploy[:scm][:app_dir]),
-          :options => play_options(),
-          :command => "target/start"
-        })
-      end
-
-      service application do
-        supports :status => true, :start => true, :stop => true, :restart => true
-        action :enable
-      end
-    end
-
-    action :force_deploy
+  opsworks_deploy do
+    deploy_data deploy
+    app application
   end
+
+  # app_dir = ::File.join(deploy[:deploy_to], "current", deploy[:scm][:app_dir])
+
+  # # Create the application configuration file
+  # template ::File.join(app_dir, "conf/application.conf") do
+  #   source "app_conf.erb"
+  #   owner "root"
+  #   group "root"
+  #   mode  "0755"
+  #   variables({
+  #     :flat_conf => play_flat_config(node[:play2][:conf])
+  #   })
+  # end
+
+  # # Create the logging configuration file
+  # template ::File.join(app_dir, "conf/logger.xml") do
+  #   source "app_logging.erb"
+  #   owner "root"
+  #   group "root"
+  #   mode  "0755"
+  # end
+
+  # execute "package #{application}" do
+  #   cwd app_dir
+  #   user "root"
+  #   command "play clean stage"
+  # end
+
+  # # Update the service template
+  # template "/etc/init.d/#{application}" do
+  #   source "app_service.erb"
+  #   owner "root"
+  #   group "root"
+  #   mode  "0755"
+  #   variables({
+  #     :name => application,
+  #     :path => app_dir,
+  #     :options => play_options(),
+  #     :command => "target/start"
+  #   })
+  # end
+
+  # service application do
+  #   supports :status => true, :start => true, :stop => true, :restart => true
+  #   action :enable
+  # end
+
+  # execute "restart #{application}" do
+  #   user "root"
+  #   command "sudo service #{application} restart"
+  # end
 end
