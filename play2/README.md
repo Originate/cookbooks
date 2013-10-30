@@ -15,7 +15,10 @@ the dependencies into an app-specific repository, and use that as the custom coo
 Example:
 ```
 git clone git://github.com/Originate/cookbooks.git originate-cookbooks
-berks install -b originate-cookbooks/play2/Berksfile -p <custom-app-repo>
+mkdir /tmp/cookbooks
+# berks install will remove everything, including .git, from the target directory
+berks install -b originate-cookbooks/play2/Berksfile -p /tmp/cookbooks
+mv /tmp/cookbooks/* <custom-app-repo>
 ```
 
 # Usage
