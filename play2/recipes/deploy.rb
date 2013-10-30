@@ -52,7 +52,7 @@ node[:deploy].each do |application, deploy|
 
   execute "package #{application}" do
     cwd app_dir
-    user deploy[:user]
+    user "root"
     command "play clean stage"
   end
 
