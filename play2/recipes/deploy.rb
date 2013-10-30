@@ -33,7 +33,7 @@ node[:deploy].each do |application, deploy|
     source "app_conf.erb"
     owner deploy[:user]
     group deploy[:group]
-    mode  "0755"
+    mode  "0644"
     variables({
       :flat_conf => play_flat_config(node[:play2][:conf])
     })
@@ -44,39 +44,40 @@ node[:deploy].each do |application, deploy|
     source "app_logging.erb"
     owner deploy[:user]
     group deploy[:group]
-    mode  "0755"
+    mode  "0644"
     variables({
       :log_file => ::File.join(shared_dir, "log/application.log")
     })
   end
 
-  # execute "package #{application}" do
-  #   cwd app_dir
-  #   user "root"
-  #   command "play clean stage"
-  # end
+  execute "package #{application}" do
+    cwd app_dir
+    user deploy[:user]
+    command "play clean stage"
+  end
 
-  # # Update the service template
-  # template "/etc/init.d/#{application}" do
-  #   source "app_service.erb"
-  #   owner "root"
-  #   group "root"
-  #   mode  "0755"
-  #   variables({
-  #     :name => application,
-  #     :path => app_dir,
-  #     :options => play_options(),
-  #     :command => "target/start"
-  #   })
-  # end
+  # Create the service for the application
+  template "/etc/init.d/#{application}" do
+    source "app_service.erb"
+    owner "root"
+    group "root"
+    mode  "0755"
+    variables({
+      :name => application,
+      :path => app_dir,
+      :options => play_options(),
+      :command => "target/start"
+    })
+  end
 
-  # service application do
-  #   supports :status => true, :start => true, :stop => true, :restart => true
-  #   action :enable
-  # end
+  service application do
+    supports :status => true, :start => true, :stop => true, :restart => true
+    action :enable
+  end
 
-  # execute "restart #{application}" do
-  #   user "root"
-  #   command "sudo service #{application} restart"
-  # end
+  # Start / restart the application
+  execute "restart #{application}" do
+    user "root"
+    command "sudo service #{application} restart"
+  end
 end
