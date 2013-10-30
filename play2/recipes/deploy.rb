@@ -2,10 +2,6 @@
 # Cookbook Name:: play2
 # Recipe:: deploy
 #
-# Copyright (C) 2013 Originate, Inc
-#
-# All rights reserved - Do Not Redistribute
-#
 
 node[:deploy].each do |application, deploy|
   app_dir    = ::File.join(deploy[:deploy_to], "current", deploy[:scm][:app_dir])

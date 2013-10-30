@@ -2,10 +2,6 @@
 # Cookbook Name:: play2
 # Recipe:: setup
 #
-# Copyright (C) 2013 Originate, Inc
-#
-# All rights reserved - Do Not Redistribute
-#
 
 include_recipe "java"
 
