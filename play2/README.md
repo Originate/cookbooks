@@ -13,7 +13,7 @@ Unfortunately, Opsworks doesn't know how to find these, so our approach is to us
 the dependencies into an app-specific repository, and use that as the custom cookbook repository in Opsworks.
 
 Example:
-```
+```bash
 git clone git://github.com/Originate/cookbooks.git originate-cookbooks
 mkdir /tmp/cookbooks
 # berks install will remove everything, including .git, from the target directory
@@ -33,7 +33,7 @@ Optionally:
 - If your application is not at the root of your repository, you can add custom JSON to the stack to let
   this cookbook know:
 
-  ```
+  ```json
   {
     "deploy": {
       "<app-name>": {
@@ -45,7 +45,7 @@ Optionally:
   }
   ```
 - If you want to customize some of the cookbook's attributes, you can add custom JSON to the stack:
-  ```
+  ```json
   {
     "play2": {
       "version": "2.1.3",
