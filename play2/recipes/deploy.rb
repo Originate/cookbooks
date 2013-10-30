@@ -22,6 +22,12 @@ node[:deploy].each do |application, deploy|
     end
   end
 
+  # Stop the application
+  execute "stop #{application}" do
+    user "root"
+    command "sudo service #{application} stop"
+  end
+
   # pull the application code
   opsworks_deploy do
     deploy_data deploy
@@ -75,9 +81,9 @@ node[:deploy].each do |application, deploy|
     action :enable
   end
 
-  # Start / restart the application
-  execute "restart #{application}" do
+  # Start the application
+  execute "start #{application}" do
     user "root"
-    command "sudo service #{application} restart"
+    command "sudo service #{application} start"
   end
 end
