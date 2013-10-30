@@ -8,6 +8,7 @@
 #
 
 node[:deploy].each do |application, deploy|
+  # Seems to be needed or else deploy_revision crashes
   directory ::File.join(deploy[:deploy_to], "shared") do
     recursive true
     action :create
@@ -25,7 +26,7 @@ node[:deploy].each do |application, deploy|
     restart_command "sudo service #{application} restart"
     before_restart do
       # Create the application template
-      template ::File.join(release_path, node[:play2][:app_dir], "conf/application.conf") do
+      template ::File.join(release_path, deploy[:scm][:app_dir], "conf/application.conf") do
         source "app_conf.erb"
         owner "root"
         group "root"
@@ -36,7 +37,7 @@ node[:deploy].each do |application, deploy|
       end
 
       execute "package the application" do
-        cwd ::File.join(release_path, node[:play2][:app_dir])
+        cwd ::File.join(release_path, deploy[:scm][:app_dir])
         user "root"
         command "play clean stage"
       end
@@ -49,7 +50,7 @@ node[:deploy].each do |application, deploy|
         mode  "0755"
         variables({
           :name => application,
-          :path => ::File.join(release_path, node[:play2][:app_dir]),
+          :path => ::File.join(release_path, deploy[:scm][:app_dir]),
           :options => play_options(),
           :command => "target/start"
         })
