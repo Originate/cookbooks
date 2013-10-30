@@ -19,6 +19,48 @@ berks install -b originate-cookbooks/play2/Berksfile -p <custom-app-repo>
 ```
 
 # Usage
+1. Create a new Stack, add your `custom-app-repo` as the source of custom cookbooks
+2. Create a new custom layer:
+  - Add `play2::setup` to the setup lifecyle event recipes
+  - Add `play2::deploy` to the deploy lifecyle event recipes
+  - Start a new instance
+3. Add your play application to the stack, and deploy it
+
+Optionally:
+- If your application is not at the root of your repository, you can add custom JSON to the stack to let
+  this cookbook know:
+
+  ```
+  {
+    "deploy": {
+      "<app-name>": {
+        "scm": {
+          "app_dir": "<path/to/app/in/repo>"
+         }
+      }
+    }
+  }
+  ```
+- If you want to customize some of the cookbook's attributes, you can add custom JSON to the stack:
+  ```
+  {
+    "play2": {
+      "version": "2.1.3",
+      "conf": {
+        "application": {
+          "langs": "en"
+        },
+        "logger": {
+          "root": "ERROR",
+          "play": "INFO",
+          "application": "DEBUG"
+        }
+      }
+    }
+  }
+  ```
+
+That's it, you should be good to go.
 
 # Attributes
 
