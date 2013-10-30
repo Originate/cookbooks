@@ -1,5 +1,5 @@
 def play_options()
-  return [default_play_options(), node[:play2][:options]].join(" ")
+  return [default_play_options(), node[:play2][:options]].compact.join(" ")
 end
 
 def default_play_options()
