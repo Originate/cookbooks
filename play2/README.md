@@ -77,7 +77,7 @@ That's it, you should be good to go.
 |`https_port`|`Integer`|`-Dhttps.port=...`|`nil`|
 |`app_conf_file`|`String`|`-Dconfig.file=...`|`nil`|
 |`log_conf_file`|`String`|`-Dlogger.file=...`|`nil`|
-
+|`options`|`String`|Additional options that you'd like to pass to play on startup<br> (ie. `-Xms2048M -Xmx6144M ...`)|`nil`|
 These options are only added if the attribute is defined.
 
 ## Application configuration
@@ -87,7 +87,3 @@ These options are only added if the attribute is defined.
 
 Enables specifying the entire application configuration from Opsworks JSON. This overwrites `conf/application.conf` 
 if defined. A sample configuration can be seen in the `Vagrantfile`.
-
-# Author
-
-Author:: Maxime Bury (<maxime.bury@originate.com>)
