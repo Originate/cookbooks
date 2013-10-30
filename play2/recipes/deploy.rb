@@ -8,38 +8,47 @@
 #
 
 node[:deploy].each do |application, deploy|
+  app_dir    = ::File.join(deploy[:deploy_to], "current", deploy[:scm][:app_dir])
+  shared_dir = ::File.join(deploy[:deploy_to], "shared")
 
-  opsworks_deploy_dir do
-    user deploy[:user]
-    group deploy[:group]
-    path deploy[:deploy_to]
+  # create shared/ directory structure
+  ['log'].each do |dir_name|
+    directory ::File.join(shared_dir, dir_name) do
+      owner deploy[:user]
+      group deploy[:group]
+      mode 0770
+      action :create
+      recursive true
+    end
   end
 
+  # pull the application code
   opsworks_deploy do
     deploy_data deploy
     app application
   end
 
-  # app_dir = ::File.join(deploy[:deploy_to], "current", deploy[:scm][:app_dir])
+  # Create the application configuration file
+  template ::File.join(app_dir, "conf/application.conf") do
+    source "app_conf.erb"
+    owner deploy[:user]
+    group deploy[:group]
+    mode  "0755"
+    variables({
+      :flat_conf => play_flat_config(node[:play2][:conf])
+    })
+  end
 
-  # # Create the application configuration file
-  # template ::File.join(app_dir, "conf/application.conf") do
-  #   source "app_conf.erb"
-  #   owner "root"
-  #   group "root"
-  #   mode  "0755"
-  #   variables({
-  #     :flat_conf => play_flat_config(node[:play2][:conf])
-  #   })
-  # end
-
-  # # Create the logging configuration file
-  # template ::File.join(app_dir, "conf/logger.xml") do
-  #   source "app_logging.erb"
-  #   owner "root"
-  #   group "root"
-  #   mode  "0755"
-  # end
+  # Create the logging configuration file
+  template ::File.join(app_dir, "conf/logger.xml") do
+    source "app_logging.erb"
+    owner deploy[:user]
+    group deploy[:group]
+    mode  "0755"
+    variables({
+      :log_file => ::File.join(shared_dir, "log/application.log")
+    })
+  end
 
   # execute "package #{application}" do
   #   cwd app_dir
