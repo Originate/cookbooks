@@ -17,8 +17,8 @@ APP_OPTIONS="<%= @options %>"
 RETVAL=0
 
 start() {
-    echo -n "Starting Play service: "
-    su $USER -c "${APPLICATION_PATH}/<%= @command %> ${APP_OPTIONS} > /dev/null &"
+    echo -n "Starting Play service: <%= @name %>" | tee -a $APPLICATION_PATH/logs/service.log
+    su $USER -c "exec ${APPLICATION_PATH}/<%= @command %> ${APP_OPTIONS} >> $APPLICATION_PATH/logs/service.log 2>&1 &"
     RETVAL=$?
 
     if [ $RETVAL -eq 0 ]; then
@@ -30,21 +30,14 @@ start() {
 }
 
 stop() {
-    if [ -f $APPLICATION_PATH/RUNNING_PID ]
-    then
-        echo -n "Shutting down Play service: ${APPLICATION_PATH}/"
-        su $USER -c "ulimit -n 65536"
-        su $USER -c "cd ${APPLICATION_PATH} ; play stop"
-    fi
+    echo -n "Shutting down Play service: <%= @name %>" | tee -a $APPLICATION_PATH/logs/service.log
+    for PID in `find $(dirname $APPLICATION_PATH)/releases -name RUNNING_PID`
+    do
+        echo "Found $PID" >> $APPLICATION_PATH/logs/service.log
+        su $USER -c "kill -9 `cat $PID` ; rm -rf $PID"
+    done
 
-    RETVAL=$?
-
-    if [ $RETVAL -eq 0 ]; then
-        echo_success
-    else
-        echo_failure
-    fi
-    echo
+    echo_success
 }
 
 status() {
@@ -53,8 +46,10 @@ status() {
 }
 
 clean() {
-        rm -f ${APPLICATION_PATH}/RUNNING_PID
+    echo "Cleaning up Play service: <%= @name %>" >> $APPLICATION_PATH/logs/service.log
+    rm -f ${APPLICATION_PATH}/RUNNING_PID
 }
+
 case "$1" in
     start)
     clean
