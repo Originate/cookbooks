@@ -7,21 +7,19 @@ node[:deploy].each do |application, deploy|
   app_dir    = ::File.join(deploy[:deploy_to], "current", deploy[:scm][:app_dir] || '.')
   shared_dir = ::File.join(deploy[:deploy_to], "shared")
 
-  # create shared/ directory structure
-  ['log'].each do |dir_name|
-    directory ::File.join(shared_dir, dir_name) do
-      owner deploy[:user]
-      group deploy[:group]
-      mode 0770
-      action :create
-      recursive true
-    end
-  end
-
   # Stop the application
   execute "stop #{application}" do
     user "root"
     command "sudo service #{application} stop"
+    only_if do
+      ::File.exists?("/etc/init.d/#{application}")
+    end
+  end
+
+  opsworks_deploy_dir do
+    user deploy[:user]
+    group deploy[:group]
+    path deploy[:deploy_to]
   end
 
   # pull the application code
