@@ -4,7 +4,7 @@
 #
 
 node[:deploy].each do |application, deploy|
-  app_dir    = ::File.join(deploy[:deploy_to], "current", deploy[:scm][:app_dir] || '.')
+  app_dir    = ::File::expand_path(::File.join(deploy[:deploy_to], "current", deploy[:scm][:app_dir] || '.'))
   shared_dir = ::File.join(deploy[:deploy_to], "shared")
 
   # Stop the application
