@@ -48,9 +48,6 @@ node[:deploy].each do |application, deploy|
     owner deploy[:user]
     group deploy[:group]
     mode  "0644"
-    variables({
-      :log_file => ::File.join(shared_dir, "log/application.log")
-    })
   end
 
   execute "package #{application}" do
