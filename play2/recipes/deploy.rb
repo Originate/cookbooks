@@ -108,7 +108,7 @@ node[:deploy].each do |application, deploy|
       end
     end
 
-    action :force_deploy
+    action :deploy
   end
 
   execute "restart #{application}" do
