@@ -45,6 +45,7 @@ Optionally:
   }
   ```
 - If you want to customize some of the cookbook's attributes, you can add custom JSON to the stack:
+
   ```json
   {
     "play2": {
