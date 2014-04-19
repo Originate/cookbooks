@@ -39,7 +39,12 @@ stop() {
     for PID in `find <%= @deploy_to %>/releases -name RUNNING_PID`
     do
         echo "Found $PID" >> $APPLICATION_PATH/logs/service.log
-        su $USER -c "kill -9 `cat $PID` ; rm -rf $PID"
+        if ps -p `cat $PID` > /dev/null
+        then
+           su $USER -c "kill -9 `cat $PID`"
+        fi
+
+        su $USER -c "rm -rf $PID"
     done
 
     echo_success
