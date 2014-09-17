@@ -1,3 +1,14 @@
+def play_url()
+  if port = node[:play2][:https_port]
+    protocol = "https"
+  else
+    port = node[:play2][:http_port] || "80"
+    protocol = "http"
+  end
+
+  return "#{protocol}://localhost:#{port.to_s}"
+end
+
 def play_options()
   return [default_play_options(), node[:play2][:options]].compact.join(" ")
 end

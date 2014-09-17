@@ -38,7 +38,7 @@ define :opsworks_play2 do
           source "wrap-ssh4git.sh"
           cookbook "play2"
           owner deploy[:user]
-          mode 00700
+          mode 0700
           variables({
             :private_key => "/home/#{deploy[:user]}/.ssh/id_deploy"
           })
@@ -130,7 +130,8 @@ define :opsworks_play2 do
             :path => app_dir,
             :deploy_to => deploy[:deploy_to],
             :options => play_options(),
-            :command => "target/start"
+            :command => "target/start",
+            :url => play_url()
           })
         end
 

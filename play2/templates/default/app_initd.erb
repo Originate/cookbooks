@@ -10,7 +10,10 @@ USER=root
 APPLICATION_NAME="<%= @name %>"
 # Path to the application source
 APPLICATION_PATH="<%= @path %>"
-APP_OPTIONS="<%= @options %>"
+# Command line options for starting Play
+APPLICATION_OPTIONS="<%= @options %>"
+# URL to ping the active server
+APPLICATION_URL="<%= @url %>"
 
 . /etc/init.d/functions
 
@@ -23,8 +26,23 @@ RETVAL=0
 
 start() {
     echo -n "Starting Play service: <%= @name %>" | tee -a $APPLICATION_PATH/logs/service.log
-    su $USER -c "exec ${APPLICATION_PATH}/<%= @command %> ${APP_OPTIONS} >> $APPLICATION_PATH/logs/service.log 2>&1 &"
-    RETVAL=$?
+    echo >> $APPLICATION_PATH/logs/service.log
+    su $USER -c "exec ${APPLICATION_PATH}/<%= @command %> ${APPLICATION_OPTIONS} >> $APPLICATION_PATH/logs/service.log 2>&1 &
+
+    RETVAL=\$?
+    PID=\$!
+    if [ \$RETVAL -eq 0 ]; then
+        while kill -0 \$PID 2> /dev/null; do
+            curl -k $APPLICATION_URL > /dev/null 2> /dev/null
+            if [ \$? == 0 ]; then
+                exit 0
+            fi
+            sleep 1.5
+        done
+        exit 1
+    else
+        exit \$RETVAL
+    fi"
 
     if [ $RETVAL -eq 0 ]; then
         echo_success
