@@ -2,7 +2,7 @@ def play_url()
   if port = node[:play2][:https_port]
     protocol = "https"
   else
-    port = node[:play2][:http_port] || "80"
+    port = node[:play2][:http_port] || 9000
     protocol = "http"
   end
 

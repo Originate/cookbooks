@@ -15,17 +15,7 @@ Vagrant.configure("2") do |config|
     chef.json = {
       :play2 => {
         :version => '2.1.3',
-        :http_port => 80,
-        :conf => {
-          "application" => {
-            "langs" => "en"
-          },
-          "logger" => {
-            "root" => "ERROR",
-            "play" => "INFO",
-            "application" => "DEBUG"
-          }
-        }
+        :http_port => 80
       },
       :deploy => {
         :sample => {

@@ -27,22 +27,27 @@ RETVAL=0
 start() {
     echo -n "Starting Play service: <%= @name %>" | tee -a $APPLICATION_PATH/logs/service.log
     echo >> $APPLICATION_PATH/logs/service.log
-    su $USER -c "exec ${APPLICATION_PATH}/<%= @command %> ${APPLICATION_OPTIONS} >> $APPLICATION_PATH/logs/service.log 2>&1 &
 
-    RETVAL=\$?
-    PID=\$!
-    if [ \$RETVAL -eq 0 ]; then
-        while kill -0 \$PID 2> /dev/null; do
-            curl -k $APPLICATION_URL > /dev/null 2> /dev/null
-            if [ \$? == 0 ]; then
-                exit 0
-            fi
-            sleep 1.5
-        done
-        exit 1
-    else
-        exit \$RETVAL
-    fi"
+    CHECK_UP=<<CMD
+        RETVAL=$?
+        PID=$!
+        if [ $RETVAL -eq 0 ]; then
+            while kill -0 $PID 2> /dev/null; do
+                echo -n "Pinging $APPLICATION_URL" | tee -a $APPLICATION_PATH/logs/service.log
+                curl -k $APPLICATION_URL > /dev/null 2> /dev/null
+                if [ $? -eq 0 ]; then
+                    exit 0
+                fi
+                sleep 1.5
+            done
+            exit 1
+        else
+            exit $RETVAL
+        fi
+CMD
+    su $USER -c "exec ${APPLICATION_PATH}/<%= @command %> ${APPLICATION_OPTIONS} >> $APPLICATION_PATH/logs/service.log 2>&1 & $CHECK_UP"
+
+    RETVAL=$?
 
     if [ $RETVAL -eq 0 ]; then
         echo_success
@@ -50,10 +55,14 @@ start() {
         echo_failure
     fi
     echo
+
+    return $RETVAL
 }
 
 stop() {
     echo -n "Shutting down Play service: <%= @name %>" | tee -a $APPLICATION_PATH/logs/service.log
+    echo >> $APPLICATION_PATH/logs/service.log
+
     for PID in `find <%= @deploy_to %>/releases -name RUNNING_PID`
     do
         echo "Found $PID" >> $APPLICATION_PATH/logs/service.log
